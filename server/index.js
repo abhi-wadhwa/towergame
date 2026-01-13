@@ -4,14 +4,32 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
 
-const server = createServer(app);
-const allowedOrigins = [
+// Build allowed origins from environment variable or use defaults
+const defaultOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://towergame-ten.vercel.app',
 ];
+
+// Add additional origins from ALLOWED_ORIGINS env var (comma-separated)
+const envOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : ['https://towergame-ten.vercel.app'];
+
+const allowedOrigins = [...defaultOrigins, ...envOrigins];
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
+
+// Health check endpoint for deployment platforms
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+const server = createServer(app);
 
 const io = new Server(server, {
   cors: {

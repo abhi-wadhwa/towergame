@@ -19,7 +19,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket: TypedSocket = io('http://localhost:3001');
+    const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+    const newSocket: TypedSocket = io(serverUrl);
 
     newSocket.on('connect', () => {
       setIsConnected(true);
